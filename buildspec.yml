@@ -1,0 +1,23 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - pip install pipenv
+  pre_build:
+    commands:
+      - echo s3 bucket name:${BUCKET}
+      - echo s3 object name:${PREFIX}
+      - echo cloudformation stack name:${STACKNAME}
+      - echo Environment:${ENV}
+  build:
+    commands:
+      - echo compile has done, package start
+      - sam package --template-file template.yaml --s3-bucket ${BUCKET} --s3-prefix ${PREFIX} --output-template-file packaged-template.yml
+      - echo deploy
+      - sam deploy --template-file packaged-template.yml --stack-name ${STACKNAME} --capabilities CAPABILITY_NAMED_IAM --parameter-overrides Environment=${ENV}
+      - echo deploy has done.
+artifacts:
+  files:
+    - packaged-template.yml
